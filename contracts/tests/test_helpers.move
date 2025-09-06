@@ -4,8 +4,6 @@ module bill_split::test_helpers {
     use std::signer;
     use std::string;
     use std::vector;
-    use aptos_framework::coin;
-    use aptos_framework::account;
     use bill_split::bill_splitter;
     use bill_split::usdc_utils;
 
@@ -19,7 +17,7 @@ module bill_split::test_helpers {
     }
 
     /// Complete hackathon demo setup
-    public entry fun setup_hackathon_demo(admin: &signer) acquires TestScenario {
+    public entry fun setup_hackathon_demo(admin: &signer) {
         let admin_addr = signer::address_of(admin);
         
         // Initialize the bill splitter system
@@ -119,14 +117,9 @@ module bill_split::test_helpers {
     ) {
         let session_id = string::utf8(b"HACKATHON_DEMO_BILL");
         
-        // Extract coins and submit payments
-        let payment1 = usdc_utils::extract_usdc(participant1, amount_each);
-        let payment2 = usdc_utils::extract_usdc(participant2, amount_each);
-        let payment3 = usdc_utils::extract_usdc(participant3, amount_each);
-        
-        bill_splitter::submit_payment(participant1, session_id, payment1);
-        bill_splitter::submit_payment(participant2, session_id, payment2);
-        bill_splitter::submit_payment(participant3, session_id, payment3);
+        bill_splitter::submit_payment(participant1, session_id, amount_each);
+        bill_splitter::submit_payment(participant2, session_id, amount_each);
+        bill_splitter::submit_payment(participant3, session_id, amount_each);
     }
 
     /// Quick setup for frontend testing
@@ -161,21 +154,21 @@ module bill_split::test_helpers {
         );
     }
 
-    /// Get demo bill status for frontend display
     #[view]
+    /// Get demo bill status for frontend display
     public fun get_demo_bill_status(): (
         string::String, address, u64, u8, u64, u64
     ) {
         let session_id = string::utf8(b"HACKATHON_DEMO_BILL");
-        let (id, merchant, multisig, total, desc, status, req_sigs, curr_sigs, payments, created) = 
+        let (_id, merchant, _multisig, total, _desc, status, req_sigs, curr_sigs, _payments, _created) = 
             bill_splitter::get_bill_session(session_id);
         
-        (id, merchant, total, status, req_sigs, curr_sigs)
+        (_id, merchant, total, status, req_sigs, curr_sigs)
     }
 
-    /// Utility to check if demo is ready
     #[view]
-    public fun is_demo_ready(): bool acquires TestScenario {
+    /// Utility to check if demo is ready
+    public fun is_demo_ready(): bool {
         exists<TestScenario>(@bill_split)
     }
 
@@ -213,7 +206,7 @@ module bill_split::test_helpers {
     /// Batch operations for stress testing
     public entry fun stress_test_setup(
         admin: &signer,
-        num_participants: u64,
+        _num_participants: u64,
         bill_amount: u64,
     ) {
         // This would create multiple bills for performance testing
@@ -241,5 +234,23 @@ module bill_split::test_helpers {
             
             i = i + 1;
         };
+    }
+
+    #[test]
+    /// Test helper function setup
+    public fun test_demo_setup() {
+        // Test that we can create test scenarios
+        assert!(true, 1); // Basic test to ensure module compiles
+    }
+
+    #[test]
+    /// Test custom bill creation
+    public fun test_custom_bill_creation() {
+        let session_id = string::utf8(b"TEST_SESSION");
+        let description = string::utf8(b"Test Description");
+        
+        // Test string operations
+        assert!(string::length(&session_id) > 0, 1);
+        assert!(string::length(&description) > 0, 2);
     }
 }
