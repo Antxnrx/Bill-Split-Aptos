@@ -9,9 +9,8 @@ module bill_split::bill_splitter {
     use aptos_framework::timestamp;
     use aptos_framework::event::{Self, EventHandle};
     use aptos_framework::account;
-    use aptos_framework::multisig_account;
     use aptos_std::smart_table::{Self, SmartTable};
-    use bill_split::usdc_utils::USDC;
+    use aptos_framework::aptos_coin::AptosCoin;
 
     // USDC coin type from usdc_utils module
 
@@ -110,22 +109,24 @@ module bill_split::bill_splitter {
     const STATUS_SETTLED: u8 = 3;
     const STATUS_CANCELLED: u8 = 4;
 
-    /// Initialize the bill splitting module
-    public entry fun initialize(admin: &signer) {
-        let _admin_addr = signer::address_of(admin);
+    /// Initialize the bill splitting module (auto-initialize on first use)
+    fun ensure_initialized(admin: &signer) {
+        if (!exists<BillRegistry>(@bill_split)) {
+            move_to(admin, BillRegistry {
+                sessions: smart_table::new(),
+                session_counter: 0,
+            });
+        };
         
-        move_to(admin, BillRegistry {
-            sessions: smart_table::new(),
-            session_counter: 0,
-        });
-
-        move_to(admin, BillEvents {
-            session_created: account::new_event_handle<SessionCreatedEvent>(admin),
-            participant_added: account::new_event_handle<ParticipantAddedEvent>(admin),
-            bill_approved: account::new_event_handle<BillApprovedEvent>(admin),
-            payment_received: account::new_event_handle<PaymentReceivedEvent>(admin),
-            bill_settled: account::new_event_handle<BillSettledEvent>(admin),
-        });
+        if (!exists<BillEvents>(@bill_split)) {
+            move_to(admin, BillEvents {
+                session_created: account::new_event_handle<SessionCreatedEvent>(admin),
+                participant_added: account::new_event_handle<ParticipantAddedEvent>(admin),
+                bill_approved: account::new_event_handle<BillApprovedEvent>(admin),
+                payment_received: account::new_event_handle<PaymentReceivedEvent>(admin),
+                bill_settled: account::new_event_handle<BillSettledEvent>(admin),
+            });
+        };
     }
 
     /// Create a new bill session with native multisig
@@ -138,6 +139,9 @@ module bill_split::bill_splitter {
         participant_names: vector<String>,
         required_signatures: u64,
     ) acquires BillRegistry, BillEvents {
+        // Auto-initialize if needed
+        ensure_initialized(merchant);
+        
         let merchant_addr = signer::address_of(merchant);
         assert!(total_amount > 0, E_INVALID_AMOUNT);
         assert!(vector::length(&participant_addresses) > 0, E_INVALID_AMOUNT);
@@ -201,28 +205,17 @@ module bill_split::bill_splitter {
         });
     }
 
-    /// Helper function to create multisig account using Aptos native multisig
+    /// Helper function to create a simple multisig identifier
+    /// For now, we'll use a deterministic address based on session data
     fun create_multisig_account(
         creator: &signer,
-        owners: vector<address>,
-        num_signatures_required: u64
+        _owners: vector<address>,
+        _num_signatures_required: u64
     ): address {
-        // Use Aptos native multisig account creation
-        // This leverages the built-in multisig_account module
-        let multisig_address = multisig_account::get_next_multisig_account_address(
-            signer::address_of(creator)
-        );
-        
-        // Create the multisig account
-        multisig_account::create_with_owners(
-            creator,
-            owners,
-            num_signatures_required,
-            vector::empty<String>(), // metadata
-            vector::empty<vector<u8>>()  // metadata
-        );
-
-        multisig_address
+        // For MVP, we'll use a simple approach: use the creator's address
+        // In production, you would implement proper multisig account creation
+        // or use Aptos native multisig with correct parameters
+        signer::address_of(creator)
     }
 
     /// Update participant amounts (allow manual adjustment)
@@ -353,7 +346,7 @@ module bill_split::bill_splitter {
         assert!(payment_amount >= amount_owed, E_INSUFFICIENT_PAYMENT);
 
         // Withdraw payment from participant
-        let payment_coin = coin::withdraw<USDC>(participant, payment_amount);
+        let payment_coin = coin::withdraw<AptosCoin>(participant, payment_amount);
 
         // Handle payment - send to merchant
         coin::deposit(bill_session.merchant_address, payment_coin);

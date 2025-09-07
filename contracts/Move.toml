@@ -4,10 +4,7 @@ version = "1.0.0"
 authors = ["Hackathon Team"]
 
 [addresses]
-bill_split = "_"
-
-[dev-addresses]
-bill_split = "0x42"
+bill_split = "0xb6b8211b250e25bfed44d8bff0ae8674c33ca354d34189f9ac03b1b6f6a67385"
 
 [dependencies]
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "mainnet" }
