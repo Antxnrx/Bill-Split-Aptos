@@ -1,77 +1,63 @@
+"use client";
+
 import React from 'react';
-import { Button } from './ui/button';
-import { Screen } from '../types';
+import { useRouter, usePathname } from 'next/navigation';
+import { Home, Plus, Users, CreditCard, History, Wallet } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import { cn } from '@/lib/utils';
 
-interface NavigationProps {
-  currentScreen: Screen;
-  onNavigate: (screen: Screen) => void;
-  hasActiveSession: boolean;
-}
+const Navigation = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { wallet } = useApp();
 
-const navigationItems = [
-  {
-    icon: "➕",
-    label: "Create Session",
-    screen: 'create' as Screen,
-  },
-  {
-    icon: "👥",
-    label: "Participants",
-    screen: 'participants' as Screen,
-  },
-  {
-    icon: "💳",
-    label: "Payments",
-    screen: 'payments' as Screen,
-  },
-  {
-    icon: "📜",
-    label: "History",
-    screen: 'history' as Screen,
-  },
-];
+  const navItems = [
+    { path: '/', icon: Home, label: 'Home' },
+    { path: '/create', icon: Plus, label: 'Create' },
+    { path: '/participants', icon: Users, label: 'Participants' },
+    { path: '/payments', icon: CreditCard, label: 'Payments' },
+    { path: '/history', icon: History, label: 'History' },
+  ];
 
-export const Navigation: React.FC<NavigationProps> = ({ 
-  currentScreen, 
-  onNavigate, 
-  hasActiveSession 
-}) => {
   return (
-    <nav className="flex flex-col items-start relative self-stretch w-full flex-[0_0_auto]">
-      <div className="flex items-start gap-1 sm:gap-2 pt-2 pb-3 px-2 sm:px-4 relative self-stretch w-full flex-[0_0_auto] bg-[#1c3023] border-t [border-top-style:solid] border-[#264433]">
-        {navigationItems.map((item) => {
-          const isActive = item.screen === currentScreen;
-          const isDisabled = !hasActiveSession && (item.screen === 'participants' || item.screen === 'payments');
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-200 px-4 py-3 z-50 shadow-lg">
+      <div className="flex justify-around items-center max-w-md mx-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.path;
           
           return (
-            <Button
-              key={item.screen}
-              variant="ghost"
-              disabled={isDisabled}
-              onClick={() => onNavigate(item.screen)}
-              className={`flex flex-col items-center justify-end gap-0.5 sm:gap-1 relative flex-1 grow rounded-[36px] h-16 sm:h-[72px] hover:bg-transparent p-0 ${
-                isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            <button
+              key={item.path}
+              onClick={() => router.push(item.path)}
+              className={cn(
+                "flex flex-col items-center gap-1 h-auto py-2 px-3 transition-all duration-200",
+                isActive 
+                  ? "nav-icon-active transform scale-105" 
+                  : "text-slate-600 hover:text-purple-500 hover:scale-105"
+              )}
             >
-              <span className="relative h-6 sm:h-8 text-lg">
-                {item.icon}
-              </span>
-
-              <div className="inline-flex flex-col items-center relative flex-[0_0_auto]">
-                <span
-                  className={`relative text-center mt-[-1.00px] [font-family:'Spline_Sans',Helvetica] font-medium text-[10px] sm:text-xs tracking-[0] leading-3 sm:leading-[18px] whitespace-nowrap ${
-                    isActive ? "text-white" : "text-[#96c4a8]"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </div>
-            </Button>
+              <Icon size={20} />
+              <span className="text-xs font-medium">{item.label}</span>
+            </button>
           );
         })}
       </div>
-
-      <div className="h-4 sm:h-5 bg-[#1c3023] relative self-stretch w-full" />
-    </nav>
+      
+      {/* Wallet Status */}
+      <div className="flex items-center justify-center mt-3">
+        <div className="wallet-connected">
+          <div className={cn(
+            "w-2 h-2 rounded-full inline-block mr-2",
+            wallet?.isConnected ? "bg-green-400" : "bg-slate-400"
+          )} />
+          <span className="font-medium">
+            {wallet?.isConnected ? `Connected: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}` : 'Not Connected'}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };
+
+export default Navigation;

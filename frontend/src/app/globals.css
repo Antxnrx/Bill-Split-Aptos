@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+/* Modern Web3 Components */
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 ease-out;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-slate-700 font-semibold py-3 px-6 rounded-2xl shadow-md hover:shadow-lg border border-slate-200 hover:border-slate-300 transform hover:scale-105 transition-all duration-200 ease-out;
+  }
+  
+  .card-modern {
+    @apply bg-white rounded-3xl shadow-lg hover:shadow-xl border border-slate-100 p-6 transition-all duration-300 ease-out;
+  }
+  
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 transition-all duration-300 ease-out;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent;
+  }
+  
+  .wallet-connected {
+    @apply bg-black/20 backdrop-blur-sm text-white text-sm px-3 py-2 rounded-full;
+  }
+  
+  .robotic-text {
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  
+  .nav-icon-active {
+    @apply text-purple-500 drop-shadow-lg;
+    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));
+  }
+  
+  .gradient-border {
+    @apply relative;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    @apply absolute inset-0 rounded-3xl p-[2px] bg-gradient-to-r from-purple-500 via-blue-500 to-pink-500;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+}
+
+/* Mobile-first responsive design */
+@layer utilities {
+  .safe-area-inset {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .mobile-container {
+    @apply max-w-md mx-auto;
+  }
+  
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Custom scrollbar for mobile */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Animation utilities */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Focus styles for accessibility */
+@layer utilities {
+  .focus-visible {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+}
+
+/* Button hover effects for mobile */
+@layer utilities {
+  .btn-mobile {
+    @apply active:scale-95 transition-transform duration-150;
+  }
+}
+
+/* Hide development indicators */
+@layer utilities {
+  /* Hide Next.js development indicators */
+  [data-nextjs-scroll-focus-boundary] {
+    display: none !important;
+  }
+  
+  /* Hide React development warnings */
+  .react-dev-overlay {
+    display: none !important;
+  }
+  
+  /* Hide any development badges */
+  [data-nextjs-toast] {
+    display: none !important;
+  }
+  
+  /* Hide build activity indicator */
+  [data-nextjs-build-activity] {
+    display: none !important;
+  }
+}
